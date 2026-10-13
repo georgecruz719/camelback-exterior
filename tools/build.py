@@ -1,10 +1,11 @@
 #!/usr/bin/env python3.11
 """Build the Camelback Exterior Co. digital card.
 
-    python3.11 tools/build.py https://camelbackexterior.com
+    python3.11 tools/build.py https://camelbackexterior.com <google business profile url>
 
 Writes index.html, george.vcf and assets/ (logo, icons, og image, QR) at the repo root.
-The URL is baked into the QR, the vCard and the link-preview tags, so re-run on a URL change.
+The card URL is baked into the vCard and the link-preview tags; the QR points at the Google
+Business Profile. Re-run when either changes.
 """
 import base64
 import io
@@ -50,9 +51,9 @@ def fold(line):
 
 
 def main():
-    if len(sys.argv) != 2 or not sys.argv[1].startswith("https://"):
-        sys.exit("usage: build.py https://<card url, no trailing slash>")
-    url = sys.argv[1].rstrip("/")
+    if len(sys.argv) != 3 or not all(a.startswith("https://") for a in sys.argv[1:]):
+        sys.exit("usage: build.py https://<card url> https://<google business profile url>")
+    url, gbp = sys.argv[1].rstrip("/"), sys.argv[2]
     assets = ROOT / "assets"
     assets.mkdir(exist_ok=True)
 
@@ -73,7 +74,7 @@ def main():
     og.paste(lg, ((1200 - w) // 2, (630 - lg.height) // 2))
     og.save(assets / "og.jpg", quality=90)
 
-    qr = segno.make(url, error="m")
+    qr = segno.make(gbp, error="m")
     qr.save(str(assets / "qr.svg"), scale=8, border=1, dark=INK, light=None)
     qr.save(str(assets / "qr.png"), scale=24, border=3, dark=INK, light="#ffffff")
 
@@ -83,8 +84,8 @@ def main():
     vcf = [
         "BEGIN:VCARD",
         "VERSION:3.0",
-        "N:;George;;;",
-        "FN:George",
+        "N:Cruz;George;;;",
+        "FN:George Cruz",
         "ORG:Camelback Exterior Co.",
         "TITLE:Owner",
         f"TEL;TYPE=CELL,VOICE:{PHONE}",
@@ -98,10 +99,10 @@ def main():
     ]
     (ROOT / "george.vcf").write_bytes(("\r\n".join(fold(l) for l in vcf) + "\r\n").encode())
 
-    html = (ROOT / "tools" / "index.template.html").read_text().replace("{{URL}}", url)
+    html = (ROOT / "tools" / "index.template.html").read_text().replace("{{URL}}", url).replace("{{GBP}}", gbp)
     (ROOT / "index.html").write_text(html)
     (ROOT / ".nojekyll").write_text("")
-    print(f"built for {url}")
+    print(f"built for {url} · QR -> {gbp}")
     for p in ["index.html", "george.vcf", *sorted(f"assets/{f.name}" for f in assets.iterdir())]:
         print(f"  {p:28} {(ROOT / p).stat().st_size:>8,} bytes")
 

@@ -4,8 +4,8 @@
     python3.11 tools/build.py https://camelbackexterior.com <google business profile url>
 
 Writes index.html, george.vcf and assets/ (logo, icons, og image, QR) at the repo root.
-The card URL is baked into the vCard and the link-preview tags; the QR points at the Google
-Business Profile. Re-run when either changes.
+The card URL is baked into the QR, the vCard and the link-preview tags; the Google Business
+Profile URL feeds the "Find Us on Google" button. Re-run when either changes.
 """
 import base64
 import io
@@ -74,7 +74,7 @@ def main():
     og.paste(lg, ((1200 - w) // 2, (630 - lg.height) // 2))
     og.save(assets / "og.jpg", quality=90)
 
-    qr = segno.make(gbp, error="m")
+    qr = segno.make(url, error="m")
     qr.save(str(assets / "qr.svg"), scale=8, border=1, dark=INK, light=None)
     qr.save(str(assets / "qr.png"), scale=24, border=3, dark=INK, light="#ffffff")
 
@@ -102,7 +102,7 @@ def main():
     html = (ROOT / "tools" / "index.template.html").read_text().replace("{{URL}}", url).replace("{{GBP}}", gbp)
     (ROOT / "index.html").write_text(html)
     (ROOT / ".nojekyll").write_text("")
-    print(f"built for {url} · QR -> {gbp}")
+    print(f"built for {url} · Google button -> {gbp}")
     for p in ["index.html", "george.vcf", *sorted(f"assets/{f.name}" for f in assets.iterdir())]:
         print(f"  {p:28} {(ROOT / p).stat().st_size:>8,} bytes")
 

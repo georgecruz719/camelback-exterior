@@ -3,7 +3,7 @@
 
     python3.11 tools/build.py https://camelbackexterior.com <google business profile url>
 
-Writes index.html, george.vcf and assets/ (logo, icons, og image, QR) at the repo root.
+Writes index.html (the website), card/index.html (the digital card), george.vcf and assets/ (logo, icons, og image, QR) at the repo root.
 The card URL is baked into the QR, the vCard and the link-preview tags; the Google Business
 Profile URL feeds the "Find Us on Google" button. Re-run when either changes.
 """
@@ -101,9 +101,12 @@ def main():
 
     html = (ROOT / "tools" / "index.template.html").read_text().replace("{{URL}}", url).replace("{{GBP}}", gbp)
     (ROOT / "index.html").write_text(html)
+    card = (ROOT / "tools" / "card.template.html").read_text().replace("{{URL}}", url).replace("{{GBP}}", gbp)
+    (ROOT / "card").mkdir(exist_ok=True)
+    (ROOT / "card" / "index.html").write_text(card)
     (ROOT / ".nojekyll").write_text("")
     print(f"built for {url} · Google button -> {gbp}")
-    for p in ["index.html", "george.vcf", *sorted(f"assets/{f.name}" for f in assets.iterdir())]:
+    for p in ["index.html", "card/index.html", "george.vcf", *sorted(f"assets/{f.name}" for f in assets.iterdir())]:
         print(f"  {p:28} {(ROOT / p).stat().st_size:>8,} bytes")
 
 

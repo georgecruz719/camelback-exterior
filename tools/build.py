@@ -93,7 +93,7 @@ def main():
         f"URL:{url}",
         "ADR;TYPE=WORK:;;;Phoenix;AZ;85016;USA",
         "NOTE:Pressure washing: driveways\\, patios\\, walkways\\, pool decks. Mobile detail: $299\\, interior and exterior. "
-        "Free quote by text: send a photo of your driveway + your zip.",
+        "Complimentary quote by text: send a photo of your driveway + your zip.",
         f"PHOTO;ENCODING=b;TYPE=JPEG:{photo}",
         "END:VCARD",
     ]
